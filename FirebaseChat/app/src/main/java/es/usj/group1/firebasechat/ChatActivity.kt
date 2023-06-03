@@ -71,6 +71,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun initChat() {
+        binding.userIdEditText.setText(userName)
         setupRecyclerView()
         setupDatabase()
         setupSendButton()

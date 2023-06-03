@@ -16,12 +16,19 @@ import kotlinx.coroutines.*
 class SplashActivity : AppCompatActivity() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
+    companion object {
+        var userId: String = ""
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // Check if data already exists in SharedPreferences
+        // Check if user ID already exists in SharedPreferences
         val sharedPreferences = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+        userId = sharedPreferences.getString("user_id", "0") ?: "0"
+
+        // Check if movies data exists in SharedPreferences
         val moviesData = sharedPreferences.getString("movies", null)
         if (moviesData != null) {
             // Start the next activity
@@ -30,33 +37,39 @@ class SplashActivity : AppCompatActivity() {
             finish()
         } else {
             // If data does not exist in SharedPreferences, get data from API
-            coroutineScope.launch {
-                try {
-                    val retrofit = Retrofit.Builder()
-                        .baseUrl("http://52.18.54.217:8080/")
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build()
+            fetchMoviesAndStartNextActivity()
+        }
+    }
 
-                    val moviesAPI = retrofit.create(MovieApi::class.java)
-                    val response = moviesAPI.getMovies()
+    private fun fetchMoviesAndStartNextActivity() {
+        // Fetch data from API and start next activity
+        coroutineScope.launch {
+            try {
+                val retrofit = Retrofit.Builder()
+                    .baseUrl("http://52.18.54.217:8080/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
 
-                    if (response.isSuccessful) {
-                        val movieList = response.body()
+                val moviesAPI = retrofit.create(MovieApi::class.java)
+                val response = moviesAPI.getMovies()
 
-                        // Save the list of movies to SharedPreferences
-                        with(sharedPreferences.edit()) {
-                            putString("movies", Gson().toJson(movieList))
-                            apply()
-                        }
+                if (response.isSuccessful) {
+                    val movieList = response.body()
 
-                        // Start the next activity
-                        val intent = Intent(this@SplashActivity, MovieListActivity::class.java)
-                        startActivity(intent)
-                        finish()
+                    // Save the list of movies to SharedPreferences
+                    val sharedPreferences = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+                    with(sharedPreferences.edit()) {
+                        putString("movies", Gson().toJson(movieList))
+                        apply()
                     }
-                } catch (e: Exception) {
-                    Log.e("SplashScreenActivity", "Error: ${e.message}")
+
+                    // Start the next activity
+                    val intent = Intent(this@SplashActivity, MovieListActivity::class.java)
+                    startActivity(intent)
+                    finish()
                 }
+            } catch (e: Exception) {
+                Log.e("SplashScreenActivity", "Error: ${e.message}")
             }
         }
     }

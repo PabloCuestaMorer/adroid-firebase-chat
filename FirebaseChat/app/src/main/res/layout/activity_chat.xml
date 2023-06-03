@@ -23,7 +23,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="User ID"
-            android:inputType="text" />
+            android:inputType="text"
+            android:minHeight="48dp"
+            android:autofillHints="" />
 
         <EditText
             android:id="@+id/messageEditText"
@@ -31,7 +33,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:hint="Message"
-            android:inputType="text" />
+            android:inputType="text"
+            android:minHeight="48dp" />
 
         <Button
             android:id="@+id/sendButton"

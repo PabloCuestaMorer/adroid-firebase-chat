@@ -1,4 +1,4 @@
-package es.usj.group1.firebasechat.utils
+package es.usj.group1.firebasechat.beans
 
 data class Movie(
     val id: Int,

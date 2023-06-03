@@ -1,15 +1,15 @@
 package es.usj.group1.firebasechat.utils
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import es.usj.group1.firebasechat.beans.ChatMessage
 import es.usj.group1.firebasechat.databinding.ItemChatBinding
-import es.usj.group1.firebasechat.utils.ChatMessage
 
-class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatDiffCallback()) {
+class ChatAdapter(private val userName: String) :
+    ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val binding = ItemChatBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -28,7 +28,9 @@ class ChatAdapter : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatDif
             binding.apply {
                 commentIdTextView.text = "Comment ID: ${chatMessage.commentId}"
                 movieIdTextView.text = "Movie ID: ${chatMessage.movieId}"
-                userIdTextView.text = "User ID: ${chatMessage.userId}"
+                // Display nickname instead of userID
+                userIdTextView.text =
+                    "Nickname: ${if (chatMessage.userId == userName) "You" else chatMessage.userId}"
                 descriptionTextView.text = chatMessage.description
                 timestampTextView.text = chatMessage.timestamp.toString()
             }

@@ -1,108 +1,143 @@
 package es.usj.group1.firebasechat
 
-import android.content.Intent
+import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
+import com.google.firebase.database.*
 import es.usj.group1.firebasechat.databinding.ActivityChatBinding
 import es.usj.group1.firebasechat.utils.ChatAdapter
-import es.usj.group1.firebasechat.utils.ChatMessage
+import es.usj.group1.firebasechat.beans.ChatMessage
 import java.util.*
 
 class ChatActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChatBinding
-    private val db = FirebaseFirestore.getInstance()
-    private lateinit var chatAdapter: ChatAdapter
+    private lateinit var database: DatabaseReference
+    private var userName: String = ""
+    private var movieId: String = ""
+    private val chatMessages = mutableListOf<ChatMessage>()
+    private val adapter = ChatAdapter(userName) // Define this adapter according to your requirement
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val selectedMovieId = intent.getStringExtra("selected_movie_id")
+        movieId = intent.getIntExtra("selected_movie_id", 0).toString()
 
-        // Check if user ID exists
-        if (SplashActivity.userId != "0") {
-            binding.userIdEditText.setText(SplashActivity.userId)
-            binding.userIdEditText.isEnabled = false // Disables editing if user ID exists
-        }
+        fetchUserName()
 
-        // Setup RecyclerView
-        chatAdapter = ChatAdapter()
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        binding.recyclerView.adapter = chatAdapter
-
-        // Listen for incoming chat messages
-        if (selectedMovieId != null) {
-            db.collection("chats").document(selectedMovieId).collection("messages")
-                .addSnapshotListener { snapshots, e ->
-                    if (e != null) {
-                        Toast.makeText(this, "Error reading messages", Toast.LENGTH_SHORT).show()
-                        return@addSnapshotListener
-                    }
-                    snapshots?.let {
-                        val messages = it.toObjects(ChatMessage::class.java)
-                        chatAdapter.submitList(messages)
-                    }
-                }
-        }
-
-        // Send button action
-        binding.sendButton.setOnClickListener {
-            val userId = SplashActivity.userId
-            val message = binding.messageEditText.text.toString()
-
-            if (userId == "0" || message.isBlank()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Generate a unique comment ID
-            generateCommentId(selectedMovieId) { commentId ->
-                if (commentId != null) {
-                    // Create ChatMessage and send to Firebase
-                    val timestamp = Date() // Get the current timestamp
-                    val chatMessage =
-                        ChatMessage(commentId, selectedMovieId, userId, message, timestamp)
-
-                    if (selectedMovieId != null) {
-                        db.collection("chats").document(selectedMovieId).collection("messages").add(chatMessage)
-                            .addOnSuccessListener {
-                                binding.messageEditText.setText("")
-                            }
-                            .addOnFailureListener {
-                                Toast.makeText(this, "Error sending message", Toast.LENGTH_SHORT).show()
-                            }
-                    }
-                } else {
-                    Toast.makeText(this, "Error generating comment ID", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        // Back button action
-        binding.backButton.setOnClickListener {
-            val intent = Intent(this@ChatActivity, MovieListActivity::class.java)
-            startActivity(intent)
+        if (userName.isBlank()) {
+            showNicknameDialog()
+        } else {
+            initChat()
         }
     }
 
-    private fun generateCommentId(movieId: String?, callback: (String?) -> Unit) {
-        if (movieId != null) {
-            val messagesRef = db.collection("chats").document(movieId).collection("messages")
-            messagesRef.orderBy("commentId", Query.Direction.DESCENDING).limit(1).get().addOnSuccessListener { documents ->
-                val lastCommentId = documents?.documents?.firstOrNull()?.getString("commentId")?.toIntOrNull() ?: 0
-                val newCommentId = (lastCommentId + 1).toString()
-                callback(newCommentId)
-            }.addOnFailureListener {
-                callback(null)
+    private fun fetchUserName() {
+        val sharedPreferences = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+        userName = sharedPreferences.getString("user_name", "") ?: ""
+    }
+
+    private fun showNicknameDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Enter Nickname")
+
+        val input = EditText(this)
+        builder.setView(input)
+
+        builder.setPositiveButton("OK") { _, _ ->
+            val nickname = input.text.toString()
+            if (nickname.isNotBlank()) {
+                saveNickname(nickname)
+                userName = nickname
+                initChat()
             }
-        } else {
-            callback(null)
         }
+
+        builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+        builder.show()
+    }
+
+    private fun saveNickname(nickname: String) {
+        val sharedPreferences = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putString("user_name", nickname)
+            apply()
+        }
+    }
+
+    private fun initChat() {
+        setupRecyclerView()
+        setupDatabase()
+        setupSendButton()
+        setupBackButton()
+        fetchChatMessages()
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.adapter = adapter
+    }
+
+    private fun setupDatabase() {
+        database = FirebaseDatabase.getInstance()
+            .getReferenceFromUrl("https://adroid-firebase-chat-default-rtdb.europe-west1.firebasedatabase.app")
+    }
+
+    private fun setupSendButton() {
+        binding.sendButton.setOnClickListener {
+            val description = binding.messageEditText.text.toString()
+            if (description.isNotBlank()) {
+                sendMessage(description)
+                binding.messageEditText.text.clear()
+            }
+        }
+    }
+
+    private fun setupBackButton() {
+        binding.backButton.setOnClickListener {
+            finish()
+        }
+    }
+
+
+    private fun sendMessage(description: String) {
+        val chatMessage = ChatMessage(null, movieId, userName, description, Date())
+        val key = database.child("messages").push().key
+        key?.let {
+            database.child("messages").child(it).setValue(chatMessage)
+        }
+    }
+
+    private fun fetchChatMessages() {
+        database.child("messages").orderByChild("movieId").equalTo(movieId)
+            .addChildEventListener(object : ChildEventListener {
+                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                    val chatMessage = snapshot.getValue(ChatMessage::class.java)
+                    chatMessage?.let {
+                        chatMessages.add(it)
+                        adapter.notifyDataSetChanged()
+                        binding.recyclerView.scrollToPosition(chatMessages.size - 1)
+                    }
+                }
+
+                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+
+                override fun onChildRemoved(snapshot: DataSnapshot) {
+                    val chatMessage = snapshot.getValue(ChatMessage::class.java)
+                    chatMessage?.let {
+                        chatMessages.remove(it)
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+
+                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
     }
 }

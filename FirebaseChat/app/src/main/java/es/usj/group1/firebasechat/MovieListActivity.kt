@@ -12,7 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import es.usj.group1.firebasechat.databinding.ActivityMovieListBinding
 import es.usj.group1.firebasechat.databinding.MovieListItemBinding
-import es.usj.group1.firebasechat.utils.Movie
+import es.usj.group1.firebasechat.beans.Movie
 
 class MovieListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMovieListBinding

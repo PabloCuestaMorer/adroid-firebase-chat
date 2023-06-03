@@ -120,8 +120,8 @@ class ChatActivity : AppCompatActivity() {
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                     val chatMessage = snapshot.getValue(ChatMessage::class.java)
                     chatMessage?.let {
-                        chatMessages.add(it)
-                        adapter.notifyDataSetChanged()
+                        chatMessages.add(it) // Add the fetched chat message to the list
+                        adapter.submitList(chatMessages.toList()) // Submit the updated list to the adapter
                         binding.recyclerView.scrollToPosition(chatMessages.size - 1)
                     }
                 }
@@ -131,8 +131,8 @@ class ChatActivity : AppCompatActivity() {
                 override fun onChildRemoved(snapshot: DataSnapshot) {
                     val chatMessage = snapshot.getValue(ChatMessage::class.java)
                     chatMessage?.let {
-                        chatMessages.remove(it)
-                        adapter.notifyDataSetChanged()
+                        chatMessages.remove(it) // Remove the deleted chat message from the list
+                        adapter.submitList(chatMessages.toList()) // Submit the updated list to the adapter
                     }
                 }
 
@@ -141,4 +141,5 @@ class ChatActivity : AppCompatActivity() {
                 override fun onCancelled(error: DatabaseError) {}
             })
     }
+
 }

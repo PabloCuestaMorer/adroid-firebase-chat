@@ -84,9 +84,9 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun setupDatabase() {
-        database = FirebaseDatabase.getInstance()
-            .getReferenceFromUrl("https://adroid-firebase-chat-default-rtdb.europe-west1.firebasedatabase.app")
+        database = FirebaseDatabase.getInstance().reference
     }
+
 
     private fun setupSendButton() {
         binding.sendButton.setOnClickListener {

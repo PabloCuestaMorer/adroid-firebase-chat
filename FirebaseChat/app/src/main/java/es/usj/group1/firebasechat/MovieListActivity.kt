@@ -36,6 +36,7 @@ class MovieListActivity : AppCompatActivity() {
                 // Start CommentsActivity, passing the ID of the selected movie to the new activity
                 val intent = Intent(this@MovieListActivity, ChatActivity::class.java).apply {
                     putExtra("selected_movie_id", movie.id)
+                    putExtra("selected_movie_title",movie.title)
                 }
                 startActivity(intent)
             }

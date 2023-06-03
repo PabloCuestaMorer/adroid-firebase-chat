@@ -18,6 +18,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private var userName: String = ""
     private var movieId: String = ""
+    private var movieTitle: String = ""
     private val chatMessages = mutableListOf<ChatMessage>()
     private val adapter = ChatAdapter(userName) // Define this adapter according to your requirement
 
@@ -27,6 +28,8 @@ class ChatActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         movieId = intent.getIntExtra("selected_movie_id", 0).toString()
+        movieTitle = intent.getStringExtra("selected_movie_title").toString()
+        binding.tvMovieTitle.text = movieTitle
 
         fetchUserName()
 

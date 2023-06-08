@@ -1,5 +1,7 @@
 package es.usj.group1.firebasechat.utils
 
+import android.app.AlertDialog
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -8,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import es.usj.group1.firebasechat.beans.ChatMessage
 import es.usj.group1.firebasechat.databinding.ItemChatBinding
 
-class ChatAdapter(private val userName: String) :
+class ChatAdapter(val context: Context, private val userName: String) :
     ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
@@ -21,8 +23,26 @@ class ChatAdapter(private val userName: String) :
         holder.bind(chatMessage)
     }
 
+    @Suppress("DEPRECATION")
     inner class ChatViewHolder(private val binding: ItemChatBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
+        // onLongClick for delete message
+        init {
+            binding.root.setOnLongClickListener {
+                //if nickname == ...
+                val position = adapterPosition
+                val builder = AlertDialog.Builder(binding.root.context)
+                builder.setTitle("Long Click Dialog")
+                builder.setMessage("Would You Like to delete: '${getItem(position).description}'")
+                builder.setPositiveButton("Yes") { dialog, _ ->
+                }
+                builder.setNegativeButton("No") { _, _ ->
+                }
+                builder.show()
+                true
+            }
+        }
 
         fun bind(chatMessage: ChatMessage) {
             binding.apply {

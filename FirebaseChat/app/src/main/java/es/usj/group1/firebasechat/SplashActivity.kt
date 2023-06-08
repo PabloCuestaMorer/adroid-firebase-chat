@@ -25,7 +25,7 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
 
         // Check if user ID already exists in SharedPreferences
-        val sharedPreferences = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("USER_IDs", Context.MODE_PRIVATE)
         userId = sharedPreferences.getString("user_id", "0") ?: "0"
 
         // Check if movies data exists in SharedPreferences
@@ -57,7 +57,7 @@ class SplashActivity : AppCompatActivity() {
                     val movieList = response.body()
 
                     // Save the list of movies to SharedPreferences
-                    val sharedPreferences = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+                    val sharedPreferences = getSharedPreferences("USER_IDs", Context.MODE_PRIVATE)
                     with(sharedPreferences.edit()) {
                         putString("movies", Gson().toJson(movieList))
                         apply()

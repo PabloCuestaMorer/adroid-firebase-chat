@@ -24,7 +24,7 @@ class MovieListActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Load movie list from SharedPreferences
-        val sharedPref = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("USER_IDs", Context.MODE_PRIVATE)
         val moviesJson = sharedPref.getString("movies", "")
         val gson = Gson()
         movieList = gson.fromJson(moviesJson, object : TypeToken<List<Movie>>() {}.type)

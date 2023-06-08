@@ -20,7 +20,7 @@ class ChatActivity : AppCompatActivity() {
     private var movieId: String = ""
     private var movieTitle: String = ""
     private val chatMessages = mutableListOf<ChatMessage>()
-    private val adapter = ChatAdapter(userName) // Define this adapter according to your requirement
+    private val adapter = ChatAdapter(this,userName) // Define this adapter according to your requirement
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +41,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun fetchUserName() {
-        val sharedPreferences = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("USER_IDs", Context.MODE_PRIVATE)
         userName = sharedPreferences.getString("user_name", "") ?: ""
     }
 
@@ -66,7 +66,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun saveNickname(nickname: String) {
-        val sharedPreferences = getSharedPreferences("MoviePrefs", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("USER_IDs", Context.MODE_PRIVATE)
         with(sharedPreferences.edit()) {
             putString("user_name", nickname)
             apply()

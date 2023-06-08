@@ -10,60 +10,44 @@ import androidx.recyclerview.widget.RecyclerView
 import es.usj.group1.firebasechat.beans.ChatMessage
 import es.usj.group1.firebasechat.databinding.ItemChatBinding
 
-class ChatAdapter(val context: Context, private val userName: String) :
-    ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatDiffCallback()) {
+class ChatAdapter(
+    private val userId: String,
+    private val onDelete: (ChatMessage) -> Unit
+) : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatMessageDiffCallback()) {
+
+    inner class ChatViewHolder(val binding: ItemChatBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
-        val binding = ItemChatBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = ItemChatBinding.inflate(layoutInflater, parent, false)
         return ChatViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val chatMessage = getItem(position)
-        holder.bind(chatMessage)
-    }
+        holder.binding.apply {
+            userIdTextView.text = chatMessage.userId
+            descriptionTextView.text = chatMessage.description
+            commentIdTextView.text = chatMessage.commentId
+            movieIdTextView.text = chatMessage.movieId
+            timestampTextView.text = chatMessage.timestamp.toString()
 
-    @Suppress("DEPRECATION")
-    inner class ChatViewHolder(private val binding: ItemChatBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        // onLongClick for delete message
-        init {
-            binding.root.setOnLongClickListener {
-                //if nickname == ...
-                val position = adapterPosition
-                val builder = AlertDialog.Builder(binding.root.context)
-                builder.setTitle("Long Click Dialog")
-                builder.setMessage("Would You Like to delete: '${getItem(position).description}'")
-                builder.setPositiveButton("Yes") { dialog, _ ->
-                }
-                builder.setNegativeButton("No") { _, _ ->
-                }
-                builder.show()
-                true
-            }
-        }
-
-        fun bind(chatMessage: ChatMessage) {
-            binding.apply {
-                commentIdTextView.text = "Comment ID: ${chatMessage.commentId}"
-                movieIdTextView.text = "Movie ID: ${chatMessage.movieId}"
-                // Display nickname instead of userID
-                userIdTextView.text =
-                    "Nickname: ${if (chatMessage.userId == userName) "You" else chatMessage.userId}"
-                descriptionTextView.text = chatMessage.description
-                timestampTextView.text = chatMessage.timestamp.toString()
+            if (chatMessage.userId == userId) {
+                //deleteButton.visibility = View.VISIBLE
+                //deleteButton.setOnClickListener { onDelete(chatMessage) }
+            } else {
+                //deleteButton.visibility = View.GONE
             }
         }
     }
+}
 
-    private class ChatDiffCallback : DiffUtil.ItemCallback<ChatMessage>() {
-        override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-            return oldItem.commentId == newItem.commentId
-        }
+class ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatMessage>() {
+    override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+        return oldItem.commentId == newItem.commentId
+    }
 
-        override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-            return oldItem == newItem
-        }
+    override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+        return oldItem == newItem
     }
 }

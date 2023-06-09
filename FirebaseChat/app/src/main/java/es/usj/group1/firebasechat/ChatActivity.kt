@@ -95,7 +95,9 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun setupDatabase() {
-        database = FirebaseDatabase.getInstance().reference
+        database =
+            FirebaseDatabase.getInstance("https://adroid-firebase-chat-default-rtdb.europe-west1.firebasedatabase.app/").reference
+
     }
 
     private fun setupSendButton() {
@@ -119,11 +121,7 @@ class ChatActivity : AppCompatActivity() {
         val newCommentId = database.child("messages").push().key
         if (newCommentId != null) {
             val chatMessage = ChatMessage(
-                newCommentId,
-                movieId,
-                userName,
-                description,
-                Date()
+                newCommentId, movieId, userName, description, Date()
             )
             database.child("messages").child(newCommentId).setValue(chatMessage)
         }

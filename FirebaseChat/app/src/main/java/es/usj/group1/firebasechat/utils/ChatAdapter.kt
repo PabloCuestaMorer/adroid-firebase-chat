@@ -3,7 +3,9 @@ package es.usj.group1.firebasechat.utils
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +17,10 @@ class ChatAdapter(
     private val onDelete: (ChatMessage) -> Unit
 ) : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatMessageDiffCallback()) {
 
-    inner class ChatViewHolder(val binding: ItemChatBinding) : RecyclerView.ViewHolder(binding.root)
+    inner class ChatViewHolder(val binding: ItemChatBinding) : RecyclerView.ViewHolder(binding.root){
+        val deleteButton: Button = binding.deleteButton
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -33,10 +38,10 @@ class ChatAdapter(
             timestampTextView.text = chatMessage.timestamp.toString()
 
             if (chatMessage.userId == userId) {
-                //deleteButton.visibility = View.VISIBLE
-                //deleteButton.setOnClickListener { onDelete(chatMessage) }
+                deleteButton.visibility = View.VISIBLE
+                deleteButton.setOnClickListener { onDelete(chatMessage) }
             } else {
-                //deleteButton.visibility = View.GONE
+                deleteButton.visibility = View.GONE
             }
         }
     }

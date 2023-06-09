@@ -82,12 +82,15 @@ class ChatActivity : AppCompatActivity() {
 
     private fun initChat() {
         binding.userIdEditText.setText(userName)
+        // Campo de texto no editable una vez introducido el nombre
+        binding.userIdEditText.isEnabled = false
         setupRecyclerView()
         setupDatabase()
         setupSendButton()
         setupBackButton()
         fetchChatMessages()
     }
+
 
     private fun setupRecyclerView() {
         binding.recyclerView.layoutManager = LinearLayoutManager(this)

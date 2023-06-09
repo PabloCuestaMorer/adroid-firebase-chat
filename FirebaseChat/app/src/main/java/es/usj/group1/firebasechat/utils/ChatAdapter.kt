@@ -1,49 +1,58 @@
 package es.usj.group1.firebasechat.utils
 
+import android.app.AlertDialog
+import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import es.usj.group1.firebasechat.beans.ChatMessage
 import es.usj.group1.firebasechat.databinding.ItemChatBinding
 
-class ChatAdapter(private val userName: String) :
-    ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatDiffCallback()) {
+class ChatAdapter(
+    private val userId: String,
+    private val onDelete: (ChatMessage) -> Unit
+) : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatMessageDiffCallback()) {
+
+    inner class ChatViewHolder(val binding: ItemChatBinding) : RecyclerView.ViewHolder(binding.root){
+        val deleteButton: Button = binding.deleteButton
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
-        val binding = ItemChatBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = ItemChatBinding.inflate(layoutInflater, parent, false)
         return ChatViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
         val chatMessage = getItem(position)
-        holder.bind(chatMessage)
-    }
+        holder.binding.apply {
+            userIdTextView.text = chatMessage.userId
+            descriptionTextView.text = chatMessage.description
+            commentIdTextView.text = chatMessage.commentId
+            movieIdTextView.text = chatMessage.movieId
+            timestampTextView.text = chatMessage.timestamp.toString()
 
-    inner class ChatViewHolder(private val binding: ItemChatBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(chatMessage: ChatMessage) {
-            binding.apply {
-                commentIdTextView.text = "Comment ID: ${chatMessage.commentId}"
-                movieIdTextView.text = "Movie ID: ${chatMessage.movieId}"
-                // Display nickname instead of userID
-                userIdTextView.text =
-                    "Nickname: ${if (chatMessage.userId == userName) "You" else chatMessage.userId}"
-                descriptionTextView.text = chatMessage.description
-                timestampTextView.text = chatMessage.timestamp.toString()
+            if (chatMessage.userId == userId) {
+                deleteButton.visibility = View.VISIBLE
+                deleteButton.setOnClickListener { onDelete(chatMessage) }
+            } else {
+                deleteButton.visibility = View.GONE
             }
         }
     }
+}
 
-    private class ChatDiffCallback : DiffUtil.ItemCallback<ChatMessage>() {
-        override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-            return oldItem.commentId == newItem.commentId
-        }
+class ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatMessage>() {
+    override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+        return oldItem.commentId == newItem.commentId
+    }
 
-        override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-            return oldItem == newItem
-        }
+    override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+        return oldItem == newItem
     }
 }

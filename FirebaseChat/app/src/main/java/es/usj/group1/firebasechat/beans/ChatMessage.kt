@@ -3,10 +3,10 @@ package es.usj.group1.firebasechat.beans
 import java.util.*
 
 data class ChatMessage(
-    val commentId: String? = null,
-    val movieId: String? = null,
-    val userId: String? = null,
-    val description: String? = null,
+    val commentId: String? = "",
+    val movieId: String? = "",
+    val userId: String? = "",
+    val description: String? = "",
     val timestamp: Date? = null
 ) {
     // No-argument constructor

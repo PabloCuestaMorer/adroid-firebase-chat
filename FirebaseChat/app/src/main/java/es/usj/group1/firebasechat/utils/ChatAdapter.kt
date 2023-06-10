@@ -1,11 +1,8 @@
 package es.usj.group1.firebasechat.utils
 
-import android.app.AlertDialog
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +15,6 @@ class ChatAdapter(
 ) : ListAdapter<ChatMessage, ChatAdapter.ChatViewHolder>(ChatMessageDiffCallback()) {
 
     inner class ChatViewHolder(val binding: ItemChatBinding) : RecyclerView.ViewHolder(binding.root){
-        val deleteButton: Button = binding.deleteButton
     }
 
 
@@ -45,14 +41,13 @@ class ChatAdapter(
             }
         }
     }
-}
+    class ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatMessage>() {
+        override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+            return oldItem.commentId == newItem.commentId
+        }
 
-class ChatMessageDiffCallback : DiffUtil.ItemCallback<ChatMessage>() {
-    override fun areItemsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-        return oldItem.commentId == newItem.commentId
-    }
-
-    override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
-        return oldItem == newItem
+        override fun areContentsTheSame(oldItem: ChatMessage, newItem: ChatMessage): Boolean {
+            return oldItem == newItem
+        }
     }
 }

@@ -9,6 +9,4 @@ data class ChatMessage(
     val description: String? = "",
     val timestamp: Date? = null
 ) {
-    // No-argument constructor
-    constructor() : this(null, null, null, null, null)
 }

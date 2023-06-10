@@ -42,40 +42,40 @@ class MovieListActivity : AppCompatActivity() {
             }
         }
     }
-}
+    class MovieAdapter(private val movieList: List<Movie>) : RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
 
-class MovieAdapter(private val movieList: List<Movie>) : RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
+        var onItemClick: ((Movie) -> Unit)? = null
 
-    var onItemClick: ((Movie) -> Unit)? = null
+        inner class MovieViewHolder(private val binding: MovieListItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
-    inner class MovieViewHolder(private val binding: MovieListItemBinding) : RecyclerView.ViewHolder(binding.root) {
-
-        init {
-            itemView.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val movie = movieList[position]
-                    onItemClick?.invoke(movie)
+            init {
+                itemView.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val movie = movieList[position]
+                        onItemClick?.invoke(movie)
+                    }
                 }
+            }
+
+            fun bind(movie: Movie) {
+                binding.movieTitle.text = movie.title
+                binding.movieYear.text = movie.year.toString()
+                binding.movieRating.text = movie.rating.toString()
             }
         }
 
-        fun bind(movie: Movie) {
-            binding.movieTitle.text = movie.title
-            binding.movieYear.text = movie.year.toString()
-            binding.movieRating.text = movie.rating.toString()
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
+            val binding = MovieListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            return MovieViewHolder(binding)
         }
+
+        override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
+            val currentMovie = movieList[position]
+            holder.bind(currentMovie)
+        }
+
+        override fun getItemCount() = movieList.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
-        val binding = MovieListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return MovieViewHolder(binding)
-    }
-
-    override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
-        val currentMovie = movieList[position]
-        holder.bind(currentMovie)
-    }
-
-    override fun getItemCount() = movieList.size
 }
